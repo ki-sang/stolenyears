@@ -1,1 +1,1 @@
-First try at animating in a radial manner. 
+AB: First try at animating in a radial manner. 
