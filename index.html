@@ -1,14 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Radial Graph Animation</title>
-  </head>
-  <body>
-    <svg width="800" height="800" id="svgCanvas"></svg>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="script.js"></script>
-  </body>
-</html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gun Killings Visualization</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #161616
+    }
 
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1; /* Ensure the Canvas is beneath the SVG */
+    }
+
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2; /* Ensure the SVG is on top of the Canvas */
+    }
+  </style>
+</head>
+<body>
+  <!-- Canvas for animated lines -->
+  <canvas id="canvas"></canvas>
+
+  <!-- SVG for static elements (circle and counters) -->
+  <svg id="svgCanvas"></svg>
+
+  <script src="script.js"></script> <!-- Link to your external JavaScript file -->
+</body>
+</html>
