@@ -30,44 +30,6 @@ const positions = {
   eighteen: { x: centerX + scale(18), y: centerY }, // 18 years
 };
 
-// Add the dots
-const dots = [
-  { x: positions.zero.x, y: positions.zero.y, label: "0", id: "zero" },
-  { x: positions.eighteen.x, y: positions.eighteen.y, label: "18 years", id: "eighteen" },
-];
-
-dots.forEach((dot) => {
-  svg.append("circle")
-    .attr("cx", dot.x)
-    .attr("cy", dot.y)
-    .attr("r", 2)
-    .attr("fill", "white")
-    .style("opacity", 0)
-    .transition()
-    .duration(2000)
-    .style("opacity", 1)
-    .transition()
-    .duration(2000)
-    .delay(2000)
-    .style("opacity", 0);
-
-  svg.append("text")
-    .attr("x", dot.x + 10)
-    .attr("y", dot.y)
-    .attr("fill", "white")
-    .attr("font-size", "12px")
-    .attr("text-anchor", "start")
-    .text(dot.label)
-    .style("opacity", 0)
-    .transition()
-    .duration(2000)
-    .style("opacity", 1)
-    .transition()
-    .duration(2000)
-    .delay(2000)
-    .style("opacity", 0);
-});
-
 // Add counters to the SVG
 const peopleCounter = svg.append("text")
   .attr("x", centerX - 1000)
@@ -90,7 +52,7 @@ const yearsCounter = svg.append("text")
 // Add labels below the counters
 svg.append("text")
   .attr("x", centerX - 1000)
-  .attr("y", centerY + 50)
+  .attr("y", centerY + 25)
   .attr("fill", "gray")
   .attr("font-size", "15px")
   .attr("text-anchor", "middle")
@@ -99,7 +61,7 @@ svg.append("text")
 
 svg.append("text")
   .attr("x", centerX + 1000)
-  .attr("y", centerY + 50)
+  .attr("y", centerY + 25)
   .attr("fill", "gray")
   .attr("font-size", "15px")
   .attr("text-anchor", "middle")
@@ -112,13 +74,60 @@ let totalStolenYears = 0;
 let displayPeople = 0;
 let displayYears = 0;
 
+// Add the dots
+const dots = [
+  { x: positions.zero.x, y: positions.zero.y, label: "0", id: "zero" },
+  { x: positions.eighteen.x, y: positions.eighteen.y, label: "18 years", id: "eighteen" },
+];
+
+function animateDots() {
+  dots.forEach((dot) => {
+    svg.append("circle")
+      .attr("cx", dot.x)
+      .attr("cy", dot.y)
+      .attr("r", 2)
+      .attr("fill", "white")
+      .style("opacity", 0)
+      .transition()
+      .duration(2000)
+      .style("opacity", 1)
+      .transition()
+      .duration(2000)
+      .delay(2000)
+      .style("opacity", 0);
+
+    svg.append("text")
+      .attr("x", dot.x + 10)
+      .attr("y", dot.y)
+      .attr("fill", "white")
+      .attr("font-size", "12px")
+      .attr("text-anchor", "start")
+      .text(dot.label)
+      .style("opacity", 0)
+      .transition()
+      .duration(2000)
+      .style("opacity", 1)
+      .transition()
+      .duration(2000)
+      .delay(2000)
+      .style("opacity", 0);
+  });
+
+  setTimeout(() => {
+    showCounters(); // Show counters after dots
+    setTimeout(() => {
+      startRadialAnimation(); // Start radial animation
+    }, 2000); // Delay before radial animation
+  }, 4000); // Delay for dots to finish
+}
+
 // Function to smoothly update the counters
 function updateCounters() {
   displayPeople += (totalPeople - displayPeople) * 0.1;
   displayYears += (totalStolenYears - displayYears) * 0.1;
 
-  peopleCounter.text(Math.floor(displayPeople));
-  yearsCounter.text(Math.floor(displayYears));
+  peopleCounter.text(Math.floor(displayPeople).toLocaleString());
+  yearsCounter.text(Math.floor(displayYears).toLocaleString());
 
   if (Math.abs(totalPeople - displayPeople) > 0.5 || Math.abs(totalStolenYears - displayYears) > 0.5) {
     requestAnimationFrame(updateCounters);
@@ -136,17 +145,29 @@ function showCounters() {
     .transition().duration(500).attr("opacity", 1);
 }
 
-function startRadialAnimation() {
-  // Radial animation logic here...
-}
+// Add Placeholder Text
+function showPlaceholder() {
+  const placeholder = svg.append("text")
+    .attr("x", centerX)
+    .attr("y", centerY - 50) // Slightly above center
+    .attr("fill", "white")
+    .attr("font-size", "24px")
+    .attr("text-anchor", "middle")
+    .style("opacity", 0)
+    .text("Placeholder text...");
 
-// Trigger radial animation after dots fade out
-setTimeout(() => {
-  showCounters(); // Show counters
-  setTimeout(() => {
-    startRadialAnimation(); // Trigger radial animation
-  }, 2000); // Start radial animation 2 seconds after counters appear
-}, 4000); // Show counters 4 seconds after dots fade out
+  placeholder.transition()
+    .duration(2000) // Fade-in duration
+    .style("opacity", 1)
+    .transition()
+    .delay(2000) // Time for reading
+    .duration(2000) // Fade-out duration
+    .style("opacity", 0)
+    .on("end", () => {
+      placeholder.remove(); // Remove the placeholder after it fades out
+      animateDots(); // Trigger the dots animation
+    });
+}
 
 function startRadialAnimation() {
   d3.csv("killed-in-gaza.csv").then(function (data) {
@@ -157,7 +178,9 @@ function startRadialAnimation() {
         ...d,
         age: Math.max(+d.age, 1),
         stolenYears: 75 - Math.max(+d.age, 1), // Stolen years calculated as 75 - age
-        angle: (i % 360) * (Math.PI / 180) + Math.floor(i / 360) * 0.01
+        angle: (i % 360) * (Math.PI / 180) + Math.floor(i / 360) * 0.01, // Angle based on index
+        name_en: d.en_name || "Unknown", // English name
+        name_ar: d.name || "غير معروف", // Arabic name
       }))
       .sort((a, b) => b.age - a.age);
 
@@ -166,8 +189,7 @@ function startRadialAnimation() {
     const angleOffsetPerLap = 0.01;
 
     const outwardDuration = 30;
-    const totalRuntime = 10000;
-    const radialDelay = totalRuntime / data.length;
+    const radialDelay = 50;
 
     function getProgressiveColor(frame) {
       const lapIndex = Math.floor(frame / pointsPerLap);
@@ -185,28 +207,93 @@ function startRadialAnimation() {
       }
     }
 
+    function showNameOnMouse(value, event) {
+      // Remove any existing name element
+      const existingName = document.querySelector(".name-popup");
+      if (existingName) existingName.remove();
+    
+      // Create a new name element
+      const nameElement = document.createElement("span");
+      nameElement.className = "name-popup";
+      nameElement.textContent = `${value.name_en}, ${value.name_ar}, ${value.age}`;
+    
+      // Style the popup
+      nameElement.style.position = "absolute";
+      nameElement.style.color = "white";
+      nameElement.style.fontSize = "12px";
+      nameElement.style.background = "rgba(50, 50, 50, 0.9)"; // Dark gray background
+      nameElement.style.padding = "5px 10px";
+      nameElement.style.borderRadius = "4px";
+      nameElement.style.pointerEvents = "none"; // Prevent blocking interactions
+      nameElement.style.transition = "opacity 0.2s ease-in-out";
+      nameElement.style.opacity = 0; // Start hidden
+      nameElement.style.zIndex = 1000; // Ensure popup is above all other elements
+    
+      // Append to the body
+      document.body.appendChild(nameElement);
+    
+      // Position near the mouse
+      const setPosition = (e) => {
+        nameElement.style.left = `${e.pageX + 10}px`;
+        nameElement.style.top = `${e.pageY + 10}px`;
+      };
+      setPosition(event);
+    
+      // Fade in
+      requestAnimationFrame(() => {
+        nameElement.style.opacity = 1;
+      });
+    
+      // Add a mousemove listener to update position
+      const mouseMoveHandler = (e) => setPosition(e);
+    
+      // Fade out and clean up on mouseout
+      const mouseOutHandler = () => {
+        nameElement.style.opacity = 0;
+        setTimeout(() => nameElement.remove(), 200); // Ensure removal after fade-out
+        document.removeEventListener("mousemove", mouseMoveHandler);
+        line.removeEventListener("mouseout", mouseOutHandler);
+      };
+    
+      document.addEventListener("mousemove", mouseMoveHandler);
+      line.addEventListener("mouseout", mouseOutHandler);
+    }    
+    
+
     function animateLine(d, angle, frame) {
       const targetX = Math.cos(angle) * scale(d.age);
       const targetY = Math.sin(angle) * scale(d.age);
       let progress = 0;
-
+    
       function drawLine() {
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(targetX * progress, targetY * progress);
-        ctx.strokeStyle = getProgressiveColor(frame);
+        ctx.strokeStyle = getProgressiveColor(frame); // Use frame color for gradient effect
         ctx.lineWidth = 1.2;
-        ctx.globalAlpha = 0.05;
+        ctx.globalAlpha = 0.1; // Adjust opacity for visibility
         ctx.stroke();
-
+    
         if (progress < 1) {
-          progress += 1 / outwardDuration;
-          requestAnimationFrame(drawLine);
+          progress += 1 / outwardDuration; // Increment progress
+          requestAnimationFrame(drawLine); // Continue drawing
         }
       }
-
+    
       drawLine();
-    }
+    
+      // Add mouseover trigger
+      const line = svg.append("line")
+        .attr("x1", centerX)
+        .attr("y1", centerY)
+        .attr("x2", centerX + targetX)
+        .attr("y2", centerY + targetY)
+        .style("stroke", "transparent")
+        .style("stroke-width", "10px")
+        .on("mouseover", function (event) {
+          showNameOnMouse(d, event); // Show name near mouse on hover
+        });
+    }    
 
     let frame = 0;
     function animate() {
@@ -227,9 +314,12 @@ function startRadialAnimation() {
       }
 
       frame++;
-      setTimeout(animate, radialDelay);
+      setTimeout(animate, radialDelay); // Delay for each line
     }
 
-    animate();
+    animate(); // Start radial animation
   });
 }
+
+// Start the visualization
+showPlaceholder();
