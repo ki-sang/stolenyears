@@ -74,51 +74,75 @@ let totalStolenYears = 0;
 let displayPeople = 0;
 let displayYears = 0;
 
-// Add the dots
-const dots = [
-  { x: positions.zero.x, y: positions.zero.y, label: "0", id: "zero" },
-  { x: positions.eighteen.x, y: positions.eighteen.y, label: "18 years", id: "eighteen" },
-];
-
+// Add the zero dot
 function animateDots() {
-  dots.forEach((dot) => {
-    svg.append("circle")
-      .attr("cx", dot.x)
-      .attr("cy", dot.y)
-      .attr("r", 2)
-      .attr("fill", "white")
-      .style("opacity", 0)
-      .transition()
-      .duration(2000)
-      .style("opacity", 1)
-      .transition()
-      .duration(2000)
-      .delay(2000)
-      .style("opacity", 0);
-
-    svg.append("text")
-      .attr("x", dot.x + 10)
-      .attr("y", dot.y)
-      .attr("fill", "white")
-      .attr("font-size", "12px")
-      .attr("text-anchor", "start")
-      .text(dot.label)
-      .style("opacity", 0)
-      .transition()
-      .duration(2000)
-      .style("opacity", 1)
-      .transition()
-      .duration(2000)
-      .delay(2000)
-      .style("opacity", 0);
-  });
-
-  setTimeout(() => {
-    showCounters(); // Show counters after dots
-    setTimeout(() => {
+  const zeroDot = svg.append("circle")
+    .attr("cx", positions.zero.x)
+    .attr("cy", positions.zero.y)
+    .attr("r", 2)
+    .attr("fill", "white")
+    .style("opacity", 0)
+    .transition()
+    .duration(2000)
+    .style("opacity", 1)
+    .on("start", function () {
+      // Start the first line animation
+      showCounters(); // Show counters
       startRadialAnimation(); // Start radial animation
-    }, 2000); // Delay before radial animation
-  }, 4000); // Delay for dots to finish
+    })
+    .transition()
+    .duration(2000)
+    .delay(2000)
+    .style("opacity", 0);
+
+  svg.append("text")
+    .attr("x", positions.zero.x)
+    .attr("y", positions.zero.y - 30)
+    .attr("fill", "white")
+    .attr("font-size", "12px")
+    .attr("text-anchor", "start")
+    .text("0")
+    .style("opacity", 0)
+    .transition()
+    .duration(2000)
+    .style("opacity", 1)
+    .transition()
+    .duration(2000)
+    .delay(2000)
+    .style("opacity", 0);
+}
+
+// Function to animate the "18 years" dot
+function animateEighteenDot() {
+  svg.append("circle")
+    .attr("cx", positions.eighteen.x)
+    .attr("cy", positions.eighteen.y)
+    .attr("r", 2)
+    .attr("fill", "darkred")
+    .style("opacity", 0)
+    .transition()
+    .duration(2000)
+    .style("opacity", 1)
+    .transition()
+    .duration(2000)
+    .delay(2000)
+    .style("opacity", 0);
+
+  svg.append("text")
+    .attr("x", positions.eighteen.x + 10)
+    .attr("y", positions.eighteen.y)
+    .attr("fill", "darkred")
+    .attr("font-size", "12px")
+    .attr("text-anchor", "start")
+    .text("18 years")
+    .style("opacity", 0)
+    .transition()
+    .duration(2000)
+    .style("opacity", 1)
+    .transition()
+    .duration(2000)
+    .delay(2000)
+    .style("opacity", 0);
 }
 
 // Function to smoothly update the counters
@@ -169,6 +193,19 @@ function showPlaceholder() {
     });
 }
 
+// Create a global tooltip
+const tooltip = d3.select("body").append("div")
+  .attr("class", "name-popup")
+  .style("position", "absolute")
+  .style("color", "white")
+  .style("font-size", "12px")
+  .style("background", "rgba(50, 50, 50, 0.9)") // Dark gray background
+  .style("padding", "5px 10px")
+  .style("border-radius", "4px")
+  .style("pointer-events", "none") // Prevent blocking interactions
+  .style("opacity", 0)
+  .style("z-index", 1000); // Ensure popup is above all other elements
+
 function startRadialAnimation() {
   d3.csv("killed-in-gaza.csv").then(function (data) {
     // Filter to include only individuals 18 years old or younger
@@ -207,114 +244,136 @@ function startRadialAnimation() {
       }
     }
 
-    function showNameOnMouse(value, event) {
-      // Remove any existing name element
-      const existingName = document.querySelector(".name-popup");
-      if (existingName) existingName.remove();
-    
-      // Create a new name element
-      const nameElement = document.createElement("span");
-      nameElement.className = "name-popup";
-      nameElement.textContent = `${value.name_en}, ${value.name_ar}, ${value.age}`;
-    
-      // Style the popup
-      nameElement.style.position = "absolute";
-      nameElement.style.color = "white";
-      nameElement.style.fontSize = "12px";
-      nameElement.style.background = "rgba(50, 50, 50, 0.9)"; // Dark gray background
-      nameElement.style.padding = "5px 10px";
-      nameElement.style.borderRadius = "4px";
-      nameElement.style.pointerEvents = "none"; // Prevent blocking interactions
-      nameElement.style.transition = "opacity 0.2s ease-in-out";
-      nameElement.style.opacity = 0; // Start hidden
-      nameElement.style.zIndex = 1000; // Ensure popup is above all other elements
-    
-      // Append to the body
-      document.body.appendChild(nameElement);
-    
-      // Position near the mouse
-      const setPosition = (e) => {
-        nameElement.style.left = `${e.pageX + 10}px`;
-        nameElement.style.top = `${e.pageY + 10}px`;
-      };
-      setPosition(event);
-    
-      // Fade in
-      requestAnimationFrame(() => {
-        nameElement.style.opacity = 1;
-      });
-    
-      // Add a mousemove listener to update position
-      const mouseMoveHandler = (e) => setPosition(e);
-    
-      // Fade out and clean up on mouseout
-      const mouseOutHandler = () => {
-        nameElement.style.opacity = 0;
-        setTimeout(() => nameElement.remove(), 200); // Ensure removal after fade-out
-        document.removeEventListener("mousemove", mouseMoveHandler);
-        line.removeEventListener("mouseout", mouseOutHandler);
-      };
-    
-      document.addEventListener("mousemove", mouseMoveHandler);
-      line.addEventListener("mouseout", mouseOutHandler);
-    }    
-    
+    function animateLine(d, angle, frame, currentOutwardDuration) {
+      return new Promise((resolve) => {
+        const targetX = Math.cos(angle) * scale(d.age);
+        const targetY = Math.sin(angle) * scale(d.age);
+        let progress = 0;
 
-    function animateLine(d, angle, frame) {
-      const targetX = Math.cos(angle) * scale(d.age);
-      const targetY = Math.sin(angle) * scale(d.age);
-      let progress = 0;
-    
-      function drawLine() {
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(targetX * progress, targetY * progress);
-        ctx.strokeStyle = getProgressiveColor(frame); // Use frame color for gradient effect
-        ctx.lineWidth = 1.2;
-        ctx.globalAlpha = 0.1; // Adjust opacity for visibility
-        ctx.stroke();
-    
-        if (progress < 1) {
-          progress += 1 / outwardDuration; // Increment progress
-          requestAnimationFrame(drawLine); // Continue drawing
+        function drawLine() {
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(targetX * progress, targetY * progress);
+          ctx.strokeStyle = getProgressiveColor(frame); // Use frame color for gradient effect
+          ctx.lineWidth = 1.2;
+          ctx.globalAlpha = 0.1; // Adjust opacity for visibility
+          ctx.stroke();
+
+          if (progress < 1) {
+            progress += 1 / currentOutwardDuration; // Use the adjusted duration
+            requestAnimationFrame(drawLine); // Continue drawing
+          } else {
+            if (frame === 0) {
+              // This is the first line, animate the 18 years dot
+              animateEighteenDot();
+            }
+            resolve(); // Line has finished animating
+          }
         }
-      }
-    
-      drawLine();
-    
-      // Add mouseover trigger
-      const line = svg.append("line")
-        .attr("x1", centerX)
-        .attr("y1", centerY)
-        .attr("x2", centerX + targetX)
-        .attr("y2", centerY + targetY)
-        .style("stroke", "transparent")
-        .style("stroke-width", "10px")
-        .on("mouseover", function (event) {
-          showNameOnMouse(d, event); // Show name near mouse on hover
-        });
-    }    
 
-    let frame = 0;
-    function animate() {
-      if (frame >= data.length) return;
+        drawLine();
 
-      const d = data[frame];
-      const lapIndex = Math.floor(frame / pointsPerLap);
-      const baseAngle = (frame % pointsPerLap) * angleStep;
-      const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
+        // Add mouseover and mouseout triggers
+        const line = svg.append("line")
+          .attr("x1", centerX)
+          .attr("y1", centerY)
+          .attr("x2", centerX + targetX)
+          .attr("y2", centerY + targetY)
+          .style("stroke", "transparent")
+          .style("stroke-width", "10px")
+          .on("mouseover", function (event) {
+            tooltip.html(`${d.name_en}, ${d.name_ar}, Age: ${d.age}`)
+              .style("left", (event.pageX + 10) + "px")
+              .style("top", (event.pageY + 10) + "px")
+              .transition()
+              .duration(200)
+              .style("opacity", 1);
+          })
+          .on("mousemove", function (event) {
+            tooltip.style("left", (event.pageX + 10) + "px")
+              .style("top", (event.pageY + 10) + "px");
+          })
+          .on("mouseout", function () {
+            tooltip.transition()
+              .duration(200)
+              .style("opacity", 0);
+          });
+      });
+    }
 
-      animateLine(d, adjustedAngle, frame);
+    async function animate() {
+      let frame = 0;
 
-      totalPeople++;
-      totalStolenYears += d.stolenYears;
+      // Animate the first line
+      if (frame < data.length) {
+        const d = data[frame];
+        const lapIndex = Math.floor(frame / pointsPerLap);
+        const baseAngle = (frame % pointsPerLap) * angleStep;
+        const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
 
-      if (frame % 10 === 0) {
+        // Adjust durations for the first line
+        let currentOutwardDuration = outwardDuration;
+        const delayMultipliers = [10]; // Slowing factor for the first line
+        currentOutwardDuration *= delayMultipliers[0];
+
+        await animateLine(d, adjustedAngle, frame, currentOutwardDuration);
+
+        totalPeople++;
+        totalStolenYears += d.stolenYears;
+
         updateCounters();
+
+        frame++;
       }
 
-      frame++;
-      setTimeout(animate, radialDelay); // Delay for each line
+      // For the next 4 frames (lines), animate lines sequentially
+      while (frame < 5 && frame < data.length) {
+        const d = data[frame];
+        const lapIndex = Math.floor(frame / pointsPerLap);
+        const baseAngle = (frame % pointsPerLap) * angleStep;
+        const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
+
+        // Adjust durations for frames 1 to 4 (second to fifth lines)
+        let currentOutwardDuration = outwardDuration;
+        const delayMultipliers = [8, 6, 4, 2]; // Slowing factors
+        currentOutwardDuration *= delayMultipliers[frame - 1];
+
+        await animateLine(d, adjustedAngle, frame, currentOutwardDuration);
+
+        totalPeople++;
+        totalStolenYears += d.stolenYears;
+
+        updateCounters();
+
+        frame++;
+      }
+
+      // Animate the rest of the lines concurrently
+      function animateRest() {
+        if (frame >= data.length) return;
+
+        const d = data[frame];
+        const lapIndex = Math.floor(frame / pointsPerLap);
+        const baseAngle = (frame % pointsPerLap) * angleStep;
+        const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
+
+        let currentOutwardDuration = outwardDuration;
+        let currentRadialDelay = radialDelay;
+
+        animateLine(d, adjustedAngle, frame, currentOutwardDuration);
+
+        totalPeople++;
+        totalStolenYears += d.stolenYears;
+
+        if (frame % 10 === 0) {
+          updateCounters();
+        }
+
+        frame++;
+        setTimeout(animateRest, currentRadialDelay);
+      }
+
+      animateRest();
     }
 
     animate(); // Start radial animation
