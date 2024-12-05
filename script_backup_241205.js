@@ -1,4 +1,3 @@
-// Get the canvas and context
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -21,17 +20,14 @@ const svg = d3.select("#svgCanvas")
   .attr("width", canvas.width)
   .attr("height", canvas.height);
 
-// Define minimum radius for the void in the center
-const minRadius = maxRadius * 0.25; // Adjust this ratio for the size of the void
-
-// Adjusted scale for line lengths
+// Scale for thresholds
 const scale = d3.scaleLinear()
-  .domain([0, 17]) // Ages from 0 to 17
-  .range([0, maxRadius - minRadius]); // Line lengths from 0 to (maxRadius - minRadius)
+  .domain([0, 18]) // Adjusted domain for 0 to 18 years
+  .range([0, maxRadius]);
 
 const positions = {
   zero: { x: centerX, y: centerY }, // Center (0 years)
-  seventeen: { x: centerX + maxRadius, y: centerY }, // 17 years
+  eighteen: { x: centerX + scale(18), y: centerY }, // 18 years
 };
 
 // Add counters to the SVG
@@ -81,7 +77,7 @@ let displayYears = 0;
 // Add the zero dot
 function animateDots() {
   const zeroDot = svg.append("circle")
-    .attr("cx", positions.zero.x + 140)
+    .attr("cx", positions.zero.x)
     .attr("cy", positions.zero.y)
     .attr("r", 2)
     .attr("fill", "white")
@@ -100,8 +96,8 @@ function animateDots() {
     .style("opacity", 0);
 
   svg.append("text")
-    .attr("x", positions.zero.x + 120)
-    .attr("y", positions.zero.y)
+    .attr("x", positions.zero.x)
+    .attr("y", positions.zero.y - 30)
     .attr("fill", "white")
     .attr("font-size", "12px")
     .attr("text-anchor", "start")
@@ -116,13 +112,29 @@ function animateDots() {
     .style("opacity", 0);
 }
 
-// Function to animate the "17 years" dot and display the data
-function animateSeventeenDot() {
+// Function to animate the "18 years" dot
+function animateEighteenDot() {
   svg.append("circle")
-    .attr("cx", positions.seventeen.x)
-    .attr("cy", positions.seventeen.y)
+    .attr("cx", positions.eighteen.x)
+    .attr("cy", positions.eighteen.y)
     .attr("r", 2)
     .attr("fill", "darkred")
+    .style("opacity", 0)
+    .transition()
+    .duration(2000)
+    .style("opacity", 1)
+    .transition()
+    .duration(2000)
+    .delay(2000)
+    .style("opacity", 0);
+
+  svg.append("text")
+    .attr("x", positions.eighteen.x + 10)
+    .attr("y", positions.eighteen.y)
+    .attr("fill", "darkred")
+    .attr("font-size", "12px")
+    .attr("text-anchor", "start")
+    .text("18 years")
     .style("opacity", 0)
     .transition()
     .duration(2000)
@@ -187,7 +199,7 @@ const tooltip = d3.select("body").append("div")
   .style("position", "absolute")
   .style("color", "white")
   .style("font-size", "12px")
-  .style("background", "#161616") // Dark gray background
+  .style("background", "rgba(50, 50, 50, 0.9)") // Dark gray background
   .style("padding", "5px 10px")
   .style("border-radius", "4px")
   .style("pointer-events", "none") // Prevent blocking interactions
@@ -196,40 +208,30 @@ const tooltip = d3.select("body").append("div")
 
 function startRadialAnimation() {
   d3.csv("killed-in-gaza.csv").then(function (data) {
-
-    // Filter to include only individuals 17 years old or younger
+    // Filter to include only individuals 18 years old or younger
     data = data
-      .filter(d => !isNaN(d.age) && +d.age >= 0 && +d.age <= 17)
-      .map((d, i) => {
-        let age = +d.age;
-        if (age === 0) {
-          // Assign a fixed value of 0.5 to ages of 0
-          age = 0.5; // Fixed value for children under 1 year old
-        }
-        return {
-          ...d,
-          age: age,
-          stolenYears: 75 - age, // Stolen years calculated as 75 - age
-          name_en: d.en_name || "Unknown", // English name
-          name_ar: d.name || "غير معروف", // Arabic name
-        };
-      })
+      .filter(d => !isNaN(d.age) && +d.age >= 0 && +d.age <= 18)
+      .map((d, i) => ({
+        ...d,
+        age: Math.max(+d.age, 1),
+        stolenYears: 75 - Math.max(+d.age, 1), // Stolen years calculated as 75 - age
+        angle: (i % 360) * (Math.PI / 180) + Math.floor(i / 360) * 0.01, // Angle based on index
+        name_en: d.en_name || "Unknown", // English name
+        name_ar: d.name || "غير معروف", // Arabic name
+      }))
       .sort((a, b) => b.age - a.age);
 
-    const totalDataPoints = data.length;
+    const pointsPerLap = 540;
+    const angleStep = 4 * Math.PI / pointsPerLap;
+    const angleOffsetPerLap = 0.01;
 
-    // Introduce the desired angular range
-    const desiredAngularRange = Math.PI * 30; // Adjust as needed
+    const outwardDuration = 30;
+    const radialDelay = 50;
 
-    // Calculate the angle step based on the desired angular range
-    const angleStep = desiredAngularRange / totalDataPoints;
-
-    const outwardDuration = 30; // Adjust as needed for speed
-    const radialDelay = 30;     // Adjust as needed for speed
-
-    // Function to get progressive color based on frame
     function getProgressiveColor(frame) {
-      const t = frame / totalDataPoints;
+      const lapIndex = Math.floor(frame / pointsPerLap);
+      const totalLaps = Math.ceil(data.length / pointsPerLap);
+      const t = lapIndex / totalLaps;
 
       if (t < 0.25) {
         return d3.interpolateRgb("#440507", "#84252f")(t / 0.25);
@@ -242,44 +244,30 @@ function startRadialAnimation() {
       }
     }
 
-    // Function to animate each line
-    function animateLine(d, frame, currentOutwardDuration) {
+    function animateLine(d, angle, frame, currentOutwardDuration) {
       return new Promise((resolve) => {
-        // Calculate the angle for this line
-        const angle = frame * angleStep;
-
-        // Adjust target coordinates with corrected scaling
-        const startX = Math.cos(angle) * minRadius;
-        const startY = Math.sin(angle) * minRadius;
-        const targetRadius = minRadius + scale(d.age);
-        const targetX = Math.cos(angle) * targetRadius;
-        const targetY = Math.sin(angle) * targetRadius;
-
+        const targetX = Math.cos(angle) * scale(d.age);
+        const targetY = Math.sin(angle) * scale(d.age);
         let progress = 0;
 
         function drawLine() {
           ctx.beginPath();
-          ctx.moveTo(startX, startY);
-          ctx.lineTo(
-            startX + (targetX - startX) * progress,
-            startY + (targetY - startY) * progress
-          );
-          ctx.strokeStyle = getProgressiveColor(frame);
-          ctx.lineWidth = 1;
+          ctx.moveTo(0, 0);
+          ctx.lineTo(targetX * progress, targetY * progress);
+          ctx.strokeStyle = getProgressiveColor(frame); // Use frame color for gradient effect
+          ctx.lineWidth = 1.2;
           ctx.globalAlpha = 0.1; // Adjust opacity for visibility
           ctx.stroke();
 
           if (progress < 1) {
-            progress += 1 / currentOutwardDuration;
-            requestAnimationFrame(drawLine);
+            progress += 1 / currentOutwardDuration; // Use the adjusted duration
+            requestAnimationFrame(drawLine); // Continue drawing
           } else {
             if (frame === 0) {
-              animateSeventeenDot();
-              showDataPointText(d, angle, targetX, targetY, frame);
-            } else if (frame > 0 && frame < 5) {
-              showDataPointText(d, angle, targetX, targetY, frame);
+              // This is the first line, animate the 18 years dot
+              animateEighteenDot();
             }
-            resolve();
+            resolve(); // Line has finished animating
           }
         }
 
@@ -287,14 +275,14 @@ function startRadialAnimation() {
 
         // Add mouseover and mouseout triggers
         const line = svg.append("line")
-          .attr("x1", centerX + startX)
-          .attr("y1", centerY + startY)
+          .attr("x1", centerX)
+          .attr("y1", centerY)
           .attr("x2", centerX + targetX)
           .attr("y2", centerY + targetY)
           .style("stroke", "transparent")
           .style("stroke-width", "10px")
           .on("mouseover", function (event) {
-            tooltip.html(`${d.name_en}, ${d.name_ar}, ${d.age.toFixed(1)} years old`)
+            tooltip.html(`${d.name_en}, ${d.name_ar}, Age: ${d.age}`)
               .style("left", (event.pageX + 10) + "px")
               .style("top", (event.pageY + 10) + "px")
               .transition()
@@ -313,74 +301,48 @@ function startRadialAnimation() {
       });
     }
 
-    // Function to display text for data points (frames 0 to 4)
-    function showDataPointText(d, angle, targetX, targetY, frame) {
-      const offset = 10; // Existing offset along the line's direction
-      const baseOffsetX = 20; // Adjust this value to move text further right
-      const angleInDegrees = (angle * 180) / Math.PI % 360;
-
-      let additionalOffsetX = baseOffsetX;
-      let textAnchor = "start";
-      if (angleInDegrees > 90 && angleInDegrees < 270) {
-        additionalOffsetX = -baseOffsetX;
-        textAnchor = "end";
-      }
-
-      const textX = centerX + targetX + Math.cos(angle) * offset + additionalOffsetX;
-      const textY = centerY + targetY + Math.sin(angle) * offset;
-
-      const dataPointText = svg.append("text")
-        .attr("x", textX)
-        .attr("y", textY)
-        .attr("fill", "darkred")
-        .attr("font-size", "12px")
-        .attr("text-anchor", textAnchor)
-        .attr("opacity", 0)
-        .text(`${d.name_en}, killed at ${d.age.toFixed(1)} years old.`);
-
-      // Set different durations based on the frame
-      let fadeInDuration = 2000;
-      let visibleDuration = 2000;
-      let fadeOutDuration = 2000;
-
-      if (frame > 0) {
-        fadeInDuration = 1000; // Faster fade-in
-        visibleDuration = 1000; // Shorter visibility
-        fadeOutDuration = 1000; // Faster fade-out
-      }
-
-      dataPointText.transition()
-        .duration(fadeInDuration)
-        .attr("opacity", 1)
-        .transition()
-        .delay(visibleDuration)
-        .duration(fadeOutDuration)
-        .attr("opacity", 0)
-        .on("end", () => {
-          dataPointText.remove();
-        });
-    }
-
     async function animate() {
       let frame = 0;
 
-      const delayMultipliers = [10, 8, 6, 4, 2]; // Slowing factors for the initial lines
-
-      // Animate the first few lines sequentially
-      while (frame < 5 && frame < data.length) {
+      // Animate the first line
+      if (frame < data.length) {
         const d = data[frame];
+        const lapIndex = Math.floor(frame / pointsPerLap);
+        const baseAngle = (frame % pointsPerLap) * angleStep;
+        const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
 
-        // Adjust durations for frames 0 to 4 (first five lines)
-        let currentOutwardDuration = outwardDuration * delayMultipliers[frame];
+        // Adjust durations for the first line
+        let currentOutwardDuration = outwardDuration;
+        const delayMultipliers = [10]; // Slowing factor for the first line
+        currentOutwardDuration *= delayMultipliers[0];
 
-        // Increment totalPeople before the animation
+        await animateLine(d, adjustedAngle, frame, currentOutwardDuration);
+
         totalPeople++;
+        totalStolenYears += d.stolenYears;
+
         updateCounters();
 
-        await animateLine(d, frame, currentOutwardDuration);
+        frame++;
+      }
 
-        // Increment totalStolenYears after the animation
+      // For the next 4 frames (lines), animate lines sequentially
+      while (frame < 5 && frame < data.length) {
+        const d = data[frame];
+        const lapIndex = Math.floor(frame / pointsPerLap);
+        const baseAngle = (frame % pointsPerLap) * angleStep;
+        const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
+
+        // Adjust durations for frames 1 to 4 (second to fifth lines)
+        let currentOutwardDuration = outwardDuration;
+        const delayMultipliers = [8, 6, 4, 2]; // Slowing factors
+        currentOutwardDuration *= delayMultipliers[frame - 1];
+
+        await animateLine(d, adjustedAngle, frame, currentOutwardDuration);
+
+        totalPeople++;
         totalStolenYears += d.stolenYears;
+
         updateCounters();
 
         frame++;
@@ -391,22 +353,24 @@ function startRadialAnimation() {
         if (frame >= data.length) return;
 
         const d = data[frame];
+        const lapIndex = Math.floor(frame / pointsPerLap);
+        const baseAngle = (frame % pointsPerLap) * angleStep;
+        const adjustedAngle = baseAngle + lapIndex * angleOffsetPerLap;
 
-        // Increment totalPeople before the animation
+        let currentOutwardDuration = outwardDuration;
+        let currentRadialDelay = radialDelay;
+
+        animateLine(d, adjustedAngle, frame, currentOutwardDuration);
+
         totalPeople++;
-
-        animateLine(d, frame, outwardDuration);
-
-        // Increment totalStolenYears after the animation
         totalStolenYears += d.stolenYears;
 
-        // Update counters every 10 frames
         if (frame % 10 === 0) {
           updateCounters();
         }
 
         frame++;
-        setTimeout(animateRest, radialDelay);
+        setTimeout(animateRest, currentRadialDelay);
       }
 
       animateRest();
