@@ -42,7 +42,7 @@ const peopleCounter = svg.append("text")
   .attr("x", centerX - (window.innerWidth * 0.35)) //formerly - 1000
   .attr("y", centerY + (window.innerHeight * 0.33)) //formerly no transformation
   .attr("fill", "grey")
-  .attr("font-size", "40px")
+  .attr("font-size", "30px")
   .attr("text-anchor", "middle")
   .attr("opacity", 0)
   .style("font-family", "'Overused Grotesk', sans-serif")
@@ -52,7 +52,7 @@ const yearsCounter = svg.append("text")
   .attr("x", centerX + (window.innerWidth * 0.35)) //formerly + 1000
   .attr("y", centerY + (window.innerHeight * 0.33)) //formerly no transformation
   .attr("fill", "grey")
-  .attr("font-size", "40px")
+  .attr("font-size", "30px")
   .attr("text-anchor", "middle")
   .attr("opacity", 0)
   .style("font-family", "'Overused Grotesk', sans-serif")
@@ -61,9 +61,9 @@ const yearsCounter = svg.append("text")
 // Add labels below the counters
 svg.append("text")
   .attr("x", centerX - (window.innerWidth * 0.35))
-  .attr("y", centerY + (window.innerHeight * 0.27)) //formerly + 25
+  .attr("y", centerY + (window.innerHeight * 0.35)) //formerly + 25
   .attr("fill", "gray")
-  .attr("font-size", "15px")
+  .attr("font-size", "10px")
   .attr("text-anchor", "middle")
   .attr("opacity", 0)
   .style("font-family", "'Overused Grotesk', sans-serif")
@@ -71,9 +71,9 @@ svg.append("text")
 
 svg.append("text")
   .attr("x", centerX + (window.innerWidth * 0.35))
-  .attr("y", centerY + (window.innerHeight * 0.27)) //formerly + 25
+  .attr("y", centerY + (window.innerHeight * 0.35)) //formerly + 25
   .attr("fill", "gray")
-  .attr("font-size", "15px")
+  .attr("font-size", "10px")
   .attr("text-anchor", "middle")
   .attr("opacity", 0)
   .style("font-family", "'Overused Grotesk', sans-serif")
@@ -88,7 +88,7 @@ let displayYears = 0;
 // Add the zero dot
 function animateDots() {
   const zeroDot = svg.append("circle")
-    .attr("cx", positions.zero.x + 140)
+    .attr("cx", positions.zero.x + 60)
     .attr("cy", positions.zero.y)
     .attr("r", 2)
     .attr("fill", "white")
@@ -108,7 +108,7 @@ function animateDots() {
     .style("font-family", "'Overused Grotesk', sans-serif");
 
   svg.append("text")
-    .attr("x", positions.zero.x + 120)
+    .attr("x", positions.zero.x + 47)
     .attr("y", positions.zero.y)
     .attr("fill", "white")
     .attr("font-size", "12px")
@@ -202,14 +202,13 @@ function showPlaceholder1() {
     .style("opacity", 0)
   
   const lines1 = [
-    "Since October 7, 2023 over 45,000 Palestinians have been directly killed",
+    "Since October 7th, 2023 over 45,000 Palestinians have been directly killed",
     "by US-funded Israeli military attacks in Gaza.",
     " ",
     " ",
-    "45,000.",
     " ",
     " ",
-    "As of October 29, 2024 this includes more than 11,350 Palestinian children",
+    "As of October 29th, 2024 this includes more than 11,350 Palestinian children",
     "whose deaths have been officially registered by health authorities."
   ];
 
@@ -224,7 +223,7 @@ function showPlaceholder1() {
     .duration(2000) // Fade-in duration
     .style("opacity", 1)
     .transition()
-    .delay(10000) // Time for reading
+    .delay(7500) // Time for reading
     .duration(2000) // Fade-out duration
     .style("opacity", 0)
     .on("end", () => {
@@ -234,53 +233,85 @@ function showPlaceholder1() {
 }
 
 function showPlaceholder2() {
-  const placeholder2 = svg.append("text")
+  // Create a text element for the initial lines (excluding the final phrase)
+  const initialPlaceholder = svg.append("text")
     .attr("x", centerX)
     .attr("y", centerY - 50) // Slightly above center
     .attr("fill", "white")
-    .attr("font-size", "14px")
+    .attr("font-size", "14px") // Maintain original font size
     .attr("text-anchor", "middle")
     .style("font-family", "'Overused Grotesk', sans-serif")
-    .style("opacity", 0)
-
-  const lines2 = [
-    "With a normal life expectancy of 75 years, these children were martyred",
-    "before reaching 18-years-old.",
-    " ",
-    " ",
-    "The attacks against Palestine have stolen a total of",
-    "673,488 years from child martyrs in Gaza."
-  ];
+    .style("opacity", 0);
   
-  lines2.forEach((line2, i) => {
-    placeholder2.append("tspan")
+  const initialLines2 = [
+    "With a normal life expectancy of 75 years, these children were martyred",
+    "before reaching 18 years old.",
+    " ",
+    " "
+  ];
+
+  // Append each initial line as a tspan
+  initialLines2.forEach((line2, i) => {
+    initialPlaceholder.append("tspan")
       .attr("x", centerX) // Keep the same x-coordinate
       .attr("dy", i === 0 ? 0 : "1.4em") // Vertical spacing
       .text(line2);
   });
-  
-  placeholder2.transition()
+
+  // Fade in the initial lines
+  initialPlaceholder.transition()
     .duration(2000) // Fade-in duration
     .style("opacity", 1)
-    .transition()
-    .delay(8000) // Time for reading
-    .duration(2000) // Fade-out duration
-    .style("opacity", 0)
     .on("end", () => {
-      placeholder2.remove(); // Remove the placeholder after it fades out
-      animateDots(); // Trigger the dots animation
+      // After a delay (e.g., 5 seconds), introduce the final phrase
+      setTimeout(() => {
+        // Create a separate text element for the final phrase
+        const finalPlaceholder = svg.append("text")
+          .attr("x", centerX)
+          .attr("y", centerY - 50 + initialLines2.length * 1.4 * 16) // Position below the last initial line
+          .attr("fill", "white")
+          .attr("font-size", "14px") // Same font size
+          .attr("text-anchor", "middle")
+          .style("font-family", "'Overused Grotesk', sans-serif")
+          .style("opacity", 0)
+          .text("These are the stolen years.");
+
+        // Fade in the final phrase
+        finalPlaceholder.transition()
+          .duration(1000) // Fade-in duration for the final phrase
+          .style("opacity", 1)
+          .on("end", () => {
+            // Fade out the initial lines
+            initialPlaceholder.transition()
+              .duration(2000) // Fade-out duration
+              .style("opacity", 0)
+              .remove(); // Remove the initial lines after fading out
+
+            // Keep the final phrase visible for a certain duration before fading out
+            finalPlaceholder.transition()
+              .delay(5000) // Time to keep the final phrase visible
+              .duration(2000) // Fade-out duration
+              .style("opacity", 0)
+              .on("end", () => {
+                finalPlaceholder.remove(); // Remove the final phrase after fading out
+                animateDots(); // Trigger the dots animation
+              });
+          });
+      }, 5000); // Initial delay before introducing the final phrase (adjust as needed)
     });
 }
+
 
 // Create a global tooltip
 const tooltip = d3.select("body").append("div")
   .attr("class", "name-popup")
   .style("position", "absolute")
   .style("color", "white")
-  .style("font-size", "12px")
+  .style("font-size", "8px")
+  .style("font-family", "'Overused Grotesk', sans-serif")
   .style("background", "#161616") // Dark gray background
   .style("padding", "5px 10px")
-  .style("border-radius", "4px")
+  .style("border-radius", "2x")
   .style("pointer-events", "none") // Prevent blocking interactions
   .style("opacity", 0)
   .style("z-index", 1000); // Ensure popup is above all other elements
@@ -315,8 +346,8 @@ function startRadialAnimation() {
     // Calculate the angle step based on the desired angular range
     const angleStep = desiredAngularRange / totalDataPoints;
 
-    const outwardDuration = 30; // Adjust as needed for speed
-    const radialDelay = 30;     // Adjust as needed for speed
+    const outwardDuration = 15; // Adjust as needed for speed
+    const radialDelay = 15;     // Adjust as needed for speed
 
     // Function to get progressive color based on frame
     function getProgressiveColor(frame) {
@@ -385,7 +416,7 @@ function startRadialAnimation() {
           .style("stroke", "transparent")
           .style("stroke-width", "10px")
           .on("mouseover", function (event) {
-            tooltip.html(`${d.name_en}, ${d.name_ar}, ${d.age.toFixed(1)} years old`)
+            tooltip.html(`${d.name_en}, ${d.name} killed at ${Math.round(d.age)} years old.`)
               .style("left", (event.pageX + 10) + "px")
               .style("top", (event.pageY + 10) + "px")
               .transition()
@@ -424,7 +455,8 @@ function startRadialAnimation() {
         .attr("x", textX)
         .attr("y", textY)
         .attr("fill", "darkred")
-        .attr("font-size", "12px")
+        .attr("font-size", "8px")
+        .style("font-family", "'Overused Grotesk', sans-serif")
         .attr("text-anchor", textAnchor)
         .attr("opacity", 0)
         .text(`${d.name_en}, killed at ${d.age.toFixed(1)} years old.`);
@@ -455,7 +487,7 @@ function startRadialAnimation() {
     async function animate() {
       let frame = 0;
 
-      const delayMultipliers = [10, 8, 6, 4, 2]; // Slowing factors for the initial lines
+      const delayMultipliers = [20, 18, 16, 14, 12]; // Slowing factors for the initial lines
 
       // Animate the first few lines sequentially
       while (frame < 5 && frame < data.length) {
