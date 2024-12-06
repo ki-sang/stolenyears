@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>stolen years</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #161616;
+      font-family: "Overused Grotesk";
+    }
+
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1; /* Ensure the Canvas is beneath the SVG */
+    }
+
+    svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2; /* Ensure the SVG is on top of the Canvas */
+    }
+
+    @font-face {
+      font-family: "Overused Grotesk";
+      src: 
+      url("../fonts/OverusedGrotesk-Light.woff2") format("woff2-variations"),
+      url("../fonts/OverusedGrotesk-Light.woff2") format("woff2");
+      font-weight: 300 900; /* Specify weight range if supported */
+    }
+  </style>
+</head>
+<body>
+  <!-- Canvas for animated lines -->
+  <canvas id="canvas"></canvas>
+  <canvas id="canvas2"></canvas>
+
+  <!-- SVG for static elements (circle and counters) -->
+  <svg id="svgCanvas"></svg>
+  <svg id="svgCanvas2"></svg>
+
+  <script src="script_merged.js"></script> <!-- Link to your external JavaScript file -->
+</body>
+</html>
