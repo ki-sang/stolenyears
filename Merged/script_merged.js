@@ -88,7 +88,7 @@ let displayYears = 0;
 // Add the zero dot
 function animateDots() {
   const zeroDot = svg.append("circle")
-    .attr("cx", positions.zero.x + 60)
+    .attr("cx", positions.zero.x + 32)
     .attr("cy", positions.zero.y)
     .attr("r", 2)
     .attr("fill", "white")
@@ -108,7 +108,7 @@ function animateDots() {
     .style("font-family", "'Overused Grotesk', sans-serif");
 
   svg.append("text")
-    .attr("x", positions.zero.x + 47)
+    .attr("x", positions.zero.x + 23)
     .attr("y", positions.zero.y)
     .attr("fill", "white")
     .attr("font-size", "12px")
@@ -413,7 +413,7 @@ function startRadialAnimation() {
           .style("stroke", "transparent")
           .style("stroke-width", "10px")
           .on("mouseover", function (event) {
-            tooltip.html(`${d.name_en}, ${d.name_ar}, ${d.age.toFixed(1)} years old`)
+            tooltip.html(`${d.name} ${d.name_en}, ${Math.round(d.age)} years old`)
               .style("left", (event.pageX + 10) + "px")
               .style("top", (event.pageY + 10) + "px")
               .transition()
@@ -456,7 +456,7 @@ function startRadialAnimation() {
         .style("font-family", "'Overused Grotesk', sans-serif")
         .attr("text-anchor", textAnchor)
         .attr("opacity", 0)
-        .text(`${d.name_en}, killed at ${d.age.toFixed(1)} years old.`);
+        .text(`${d.name_en}, killed at ${Math.round(d.age)} years old.`);
 
       // Set different durations based on the frame
       let fadeInDuration = 2000;
@@ -484,7 +484,7 @@ function startRadialAnimation() {
     async function animate() {
       let frame = 0;
 
-      const delayMultipliers = [20, 18, 16, 14, 12]; // Slowing factors for the initial lines
+      const delayMultipliers = [20, 16, 12, 10, 8]; // Slowing factors for the initial lines
 
       // Animate the first few lines sequentially
       while (frame < 5 && frame < data.length) {
