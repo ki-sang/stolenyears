@@ -40,7 +40,7 @@ const positions = {
 // Add counters to the SVG
 const peopleCounter = svg.append("text")
   .attr("x", centerX - (window.innerWidth * 0.35)) //formerly - 1000
-  .attr("y", centerY + (window.innerHeight * 0.3)) //formerly no transformation
+  .attr("y", centerY + (window.innerHeight * 0.33)) //formerly no transformation
   .attr("fill", "grey")
   .attr("font-size", "40px")
   .attr("text-anchor", "middle")
@@ -50,7 +50,7 @@ const peopleCounter = svg.append("text")
 
 const yearsCounter = svg.append("text")
   .attr("x", centerX + (window.innerWidth * 0.35)) //formerly + 1000
-  .attr("y", centerY + (window.innerHeight * 0.3)) //formerly no transformation
+  .attr("y", centerY + (window.innerHeight * 0.33)) //formerly no transformation
   .attr("fill", "grey")
   .attr("font-size", "40px")
   .attr("text-anchor", "middle")
