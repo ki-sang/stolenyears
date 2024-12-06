@@ -1,9 +1,7 @@
-// font
-
-
 // Get the canvas and context
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const fadeOverlay = document.getElementById("fadeOverlay");
 
 // Fullscreen canvas
 canvas.width = window.innerWidth;
@@ -48,7 +46,7 @@ const peopleCounter = svg.append("text")
   .style("font-family", "'Overused Grotesk', sans-serif")
   .text("0");
 
-const yearsCounter = svg.append("text")
+  const yearsCounter = svg.append("text")
   .attr("x", centerX + (window.innerWidth * 0.35)) //formerly + 1000
   .attr("y", centerY + (window.innerHeight * 0.33)) //formerly no transformation
   .attr("fill", "grey")
@@ -206,7 +204,7 @@ function showPlaceholder1() {
     " ",
     " ",
     " ",
-    "as of october 29, 2024 this includes 11,355 Palestinian children whose",
+    "as of october 29, 2024 this includes 11,354 Palestinian children whose",
     "deaths have been officially registered by health authorities."
   ];
 
@@ -242,8 +240,8 @@ function showPlaceholder2() {
     .style("opacity", 0);
   
   const initialLines2 = [
-    "despite having a normal life expectancy of 75 years, these",
-    "children were martyred before turning 18 years old.",
+    "despite having a normal life expectancy of 75 years, each of",
+    "these children were martyred before turning 18 years old.",
     " ",
     " "
   ];
@@ -343,8 +341,8 @@ function startRadialAnimation() {
     // Calculate the angle step based on the desired angular range
     const angleStep = desiredAngularRange / totalDataPoints;
 
-    const outwardDuration = 15; // Adjust as needed for speed
-    const radialDelay = 15;     // Adjust as needed for speed
+    const outwardDuration = 10; // Adjust as needed for speed
+    const radialDelay = 10;     // Adjust as needed for speed
 
     // Function to get progressive color based on frame
     function getProgressiveColor(frame) {
@@ -514,6 +512,21 @@ function startRadialAnimation() {
 
         // Increment totalPeople before the animation
         totalPeople++;
+        
+
+        function fadeToBlack() {
+          fadeOverlay.style.opacity = "1"; // Gradually make the overlay opaque
+          fadeOverlay.addEventListener("transitionend", () => {
+            fadeOverlay.remove();
+            canvas.remove(); // Remove the canvas after the fade-out
+            svg.remove();
+          });
+          setTimeout(triggerNextFunction, 2500);
+        }
+
+        if (totalPeople >= 11354) {
+          setTimeout(fadeToBlack, 4000)
+        }
 
         animateLine(d, frame, outwardDuration);
 
@@ -536,16 +549,11 @@ function startRadialAnimation() {
   
     // Start radial animation
   });
+  
 }
 
 // Start the visualization
 showPlaceholder();
-
-// Add a listener for the animation end event
-canvas.addEventListener("animationend", () => {
-  canvas.remove(); // Remove the canvas from the DOM
-  triggerNextFunction(); // Call the next function
-});
 
 // Define the next function to trigger
 function triggerNextFunction() {
@@ -574,34 +582,43 @@ function triggerNextFunction() {
       .attr("x", centerX)
       .attr("y", centerY - 50) // Slightly above center
       .attr("fill", "white")
-      .attr("font-size", "24px")
+      .attr("font-size", "14px")
       .attr("text-anchor", "middle")
       .style("font-family", "'Overused Grotesk', sans-serif")
       .style("opacity", 0)
-      .text("11,355 children",
-        " ",
-        "673,488 stolen years",
-      );
     
-      transText.transition()
+    const transLines = [
+      "11,354 children",
+      " ",
+      "752,401 stolen years"
+    ];
+  
+    transLines.forEach((transLines, i) => {
+      transText.append("tspan")
+        .attr("x", centerX) // Keep the same x-coordinate
+        .attr("dy", i === 0 ? 0 : "1.4em") // Vertical spacing
+        .text(transLines);
+    });
+  
+    transText.transition()
       .duration(2000) // Fade-in duration
       .style("opacity", 1)
       .transition()
-      .delay(5000) // Time for reading
+      .delay(4500) // Time for reading
       .duration(2000) // Fade-out duration
       .style("opacity", 0)
       .on("end", () => {
-        transText.remove(); // Remove the transText after it fades out
-        setTimeout(showTransition2, 1000); // Trigger transText2 after delay
+        transText.remove(); // Remove the placeholder after it fades out
+        setTimeout(showTransition2, 500); // Trigger placeholder2
       });
   }
 
   function showTransition2() {
-    const transText2 = svg2.append("text")
+    const transText2 = svg2.append("text") // EDITED FROM svg2 TO svg
       .attr("x", centerX)
       .attr("y", centerY - 50) // Slightly above center
       .attr("fill", "white")
-      .attr("font-size", "24px")
+      .attr("font-size", "14px")
       .attr("text-anchor", "middle")
       .style("font-family", "'Overused Grotesk', sans-serif")
       .style("opacity", 0)
