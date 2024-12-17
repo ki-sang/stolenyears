@@ -169,7 +169,7 @@ function showPlaceholder() {
     .attr("x", centerX)
     .attr("y", centerY - 50) // Slightly above center
     .attr("fill", "white")
-    .attr("font-size", "24px")
+    .attr("font-size", canvas.height * 0.05)
     .attr("text-anchor", "middle")
     .style("font-family", "'Overused Grotesk', sans-serif")
     .style("opacity", 0)
@@ -193,7 +193,7 @@ function showPlaceholder1() {
     .attr("x", centerX)
     .attr("y", centerY - 50) // Slightly above center
     .attr("fill", "white")
-    .attr("font-size", "14px")
+    .attr("font-size", canvas.height * 0.021)
     .attr("text-anchor", "middle")
     .style("font-family", "'Overused Grotesk', sans-serif")
     .style("opacity", 0)
@@ -234,14 +234,14 @@ function showPlaceholder2() {
     .attr("x", centerX)
     .attr("y", centerY - 50) // Slightly above center
     .attr("fill", "white")
-    .attr("font-size", "14px") // Maintain original font size
+    .attr("font-size", canvas.height * 0.021) // Maintain original font size
     .attr("text-anchor", "middle")
     .style("font-family", "'Overused Grotesk', sans-serif")
     .style("opacity", 0);
   
   const initialLines2 = [
     "despite having a normal life expectancy of 75 years, each of",
-    "these children were martyred before turning 18 years old.",
+    "these children was martyred before turning 18 years old.",
     " ",
     " "
   ];
@@ -266,7 +266,7 @@ function showPlaceholder2() {
           .attr("x", centerX)
           .attr("y", centerY - 50 + initialLines2.length * 1.4 * 16) // Position below the last initial line
           .attr("fill", "white")
-          .attr("font-size", "14px") // Same font size
+          .attr("font-size", canvas.height * 0.021) // Same font size
           .attr("text-anchor", "middle")
           .style("font-family", "'Overused Grotesk', sans-serif")
           .style("opacity", 0)
@@ -302,7 +302,7 @@ const tooltip = d3.select("body").append("div")
   .attr("class", "name-popup")
   .style("position", "absolute")
   .style("color", "white")
-  .style("font-size", "8px")
+  .style("font-size", canvas.height * 0.01)
   .style("font-family", "'Overused Grotesk', sans-serif")
   .style("background", "#161616") // Dark gray background
   .style("padding", "5px 10px")
@@ -341,8 +341,8 @@ function startRadialAnimation() {
     // Calculate the angle step based on the desired angular range
     const angleStep = desiredAngularRange / totalDataPoints;
 
-    const outwardDuration = 10; // Adjust as needed for speed
-    const radialDelay = 10;     // Adjust as needed for speed
+    const outwardDuration = 8; // Adjust as needed for speed
+    const radialDelay = 8;     // Adjust as needed for speed
 
     // Function to get progressive color based on frame
     function getProgressiveColor(frame) {
@@ -450,7 +450,7 @@ function startRadialAnimation() {
         .attr("x", textX)
         .attr("y", textY)
         .attr("fill", "darkred")
-        .attr("font-size", "8px")
+        .attr("font-size", canvas.height * 0.01)
         .style("font-family", "'Overused Grotesk', sans-serif")
         .attr("text-anchor", textAnchor)
         .attr("opacity", 0)
@@ -482,7 +482,7 @@ function startRadialAnimation() {
     async function animate() {
       let frame = 0;
 
-      const delayMultipliers = [20, 16, 12, 10, 8]; // Slowing factors for the initial lines
+      const delayMultipliers = [40, 32, 24, 20, 16]; // Slowing factors for the initial lines
 
       // Animate the first few lines sequentially
       while (frame < 5 && frame < data.length) {
@@ -582,7 +582,7 @@ function triggerNextFunction() {
       .attr("x", centerX)
       .attr("y", centerY - 50) // Slightly above center
       .attr("fill", "white")
-      .attr("font-size", "14px")
+      .attr("font-size", canvas.height * 0.021)
       .attr("text-anchor", "middle")
       .style("font-family", "'Overused Grotesk', sans-serif")
       .style("opacity", 0)
@@ -618,7 +618,7 @@ function triggerNextFunction() {
       .attr("x", centerX)
       .attr("y", centerY - 50) // Slightly above center
       .attr("fill", "white")
-      .attr("font-size", "14px")
+      .attr("font-size", canvas.height * 0.021)
       .attr("text-anchor", "middle")
       .style("font-family", "'Overused Grotesk', sans-serif")
       .style("opacity", 0)
