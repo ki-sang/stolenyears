@@ -1,1 +1,8 @@
+Updated December 16, 2024
 
+This visualization is based off the data collected and cleaned by Palestine Datasets at https://data.techforpalestine.org/docs/killed-in-gaza/.
+Specifically, the "Killed in Gaza" dataset was used. It was downloaded for this project on October 29, 2024 when it was last updated on September 21, 2024.
+
+Due to the size of the original dataset, only the children under 18 years of age were included in the visualization.
+
+This project was completed for the Fall 2024 cohort of Data Visualization taught by Jia Zhang at Columbia University Graduate School of Architecture, Planning, and Preservation by André B. Santos and Ki-Sang Yi.
